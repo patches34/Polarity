@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent (typeof(Rigidbody))]
 public class PlayerControls : MonoBehaviour
 {
     [Range (1, 10)]
@@ -11,9 +12,15 @@ public class PlayerControls : MonoBehaviour
     public float lookYMax;
     public Camera playerCam;
 
+    [Range (1, 100)]
+    public float speed;
+    Vector3 moveDir = Vector3.zero;
+    Rigidbody rb;
+
 	// Use this for initialization
-	void Start () {
-		
+	void Start ()
+    {
+        rb = GetComponent<Rigidbody>();
 	}
 	
 	// Update is called once per frame
@@ -42,7 +49,9 @@ public class PlayerControls : MonoBehaviour
         #endregion
 
         #region Move
-
+        moveDir = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
+        Debug.Log(moveDir);
+        rb.AddRelativeForce(moveDir * speed * Time.deltaTime, ForceMode.Impulse);
         #endregion
     }
 }
