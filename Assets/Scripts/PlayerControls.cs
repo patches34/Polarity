@@ -47,7 +47,10 @@ public class PlayerControls : MonoBehaviour
         }
         #endregion
         #endregion
+    }
 
+    private void FixedUpdate()
+    {
         #region Move
         moveDir = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
         Debug.Log(moveDir);
