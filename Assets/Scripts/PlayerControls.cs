@@ -17,6 +17,8 @@ public class PlayerControls : MonoBehaviour
     Vector3 moveDir = Vector3.zero;
     Rigidbody rb;
 
+    public bool isGrounded;
+
 	// Use this for initialization
 	void Start ()
     {
@@ -47,14 +49,28 @@ public class PlayerControls : MonoBehaviour
         }
         #endregion
         #endregion
+
+        #region Move
+        if(isGrounded)
+        {
+            moveDir = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
+
+            Debug.Log(moveDir);
+
+            transform.Translate(moveDir, Space.Self);
+        }
+        #endregion
     }
 
     private void FixedUpdate()
     {
         #region Move
-        moveDir = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
-        Debug.Log(moveDir);
-        rb.AddRelativeForce(moveDir * speed * Time.deltaTime, ForceMode.Impulse);
+        if (!isGrounded)
+        {
+            moveDir = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
+            Debug.Log(moveDir);
+            rb.AddRelativeForce(moveDir * speed * Time.deltaTime, ForceMode.Impulse);
+        }
         #endregion
     }
 }
