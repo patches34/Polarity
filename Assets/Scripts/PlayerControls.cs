@@ -18,6 +18,9 @@ public class PlayerControls : MonoBehaviour
     Rigidbody rb;
 
     public bool isGrounded;
+    public Dictionary<int, Vector3> magForces = new Dictionary<int, Vector3>();
+
+    public Polarity polarity;
 
 	// Use this for initialization
 	void Start ()
@@ -55,8 +58,6 @@ public class PlayerControls : MonoBehaviour
         {
             moveDir = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
 
-            Debug.Log(moveDir);
-
             transform.Translate(moveDir, Space.Self);
         }
         #endregion
@@ -64,13 +65,61 @@ public class PlayerControls : MonoBehaviour
 
     private void FixedUpdate()
     {
-        #region Move
+        foreach (Vector3 force in magForces.Values)
+        {
+            if(force.normalized == transform.up)
+            {
+                SetIsGrounded(false);
+            }
+        }
+       
         if (!isGrounded)
         {
+            #region Move
             moveDir = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
-            Debug.Log(moveDir);
+
             rb.AddRelativeForce(moveDir * speed * Time.deltaTime, ForceMode.Impulse);
+            #endregion
+
+            #region Add magnet forces
+            foreach (Vector3 force in magForces.Values)
+            {
+                rb.AddForce(force * (int)polarity, ForceMode.Force);
+            }
+            #endregion
         }
-        #endregion
+
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        int id = other.GetInstanceID();
+
+        if (other.tag.Equals("Magnet"))
+        {
+            if (!magForces.ContainsKey(id))
+            {
+                magForces.Add(id, other.GetComponent<MagnetConstantForce>().GetForce());
+            }
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        int id = other.GetInstanceID();
+
+        if (other.tag.Equals("Magnet"))
+        {
+            if (magForces.ContainsKey(id))
+            {
+                magForces.Remove(id);
+            }
+        }
+    }
+
+    void SetIsGrounded(bool value)
+    {
+        rb.isKinematic = value;
+        isGrounded = value;
     }
 }
