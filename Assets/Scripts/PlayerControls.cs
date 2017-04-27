@@ -12,8 +12,10 @@ public class PlayerControls : MonoBehaviour
     public float lookYMax;
     public Camera playerCam;
 
-    [Range (1, 100)]
+    [Range (1, 30)]
     public float speed;
+    [Range (1,1000)]
+    public float jumpForce;
     Vector3 moveDir = Vector3.zero;
     Rigidbody rb;
 
@@ -58,13 +60,14 @@ public class PlayerControls : MonoBehaviour
         {
             moveDir = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
 
-            transform.Translate(moveDir, Space.Self);
+            transform.Translate(moveDir * speed * Time.deltaTime, Space.Self);
         }
         #endregion
     }
 
     private void FixedUpdate()
     {
+        #region Check if should be pushed off ground
         foreach (Vector3 force in magForces.Values)
         {
             if(force.normalized == transform.up)
@@ -72,7 +75,8 @@ public class PlayerControls : MonoBehaviour
                 SetIsGrounded(false);
             }
         }
-       
+        #endregion
+
         if (!isGrounded)
         {
             #region Move
@@ -85,6 +89,17 @@ public class PlayerControls : MonoBehaviour
             foreach (Vector3 force in magForces.Values)
             {
                 rb.AddForce(force * (int)polarity, ForceMode.Force);
+            }
+            #endregion
+        }
+        else
+        {
+            #region Jump
+            if (Input.GetAxis("Jump") > 0)
+            {
+                SetIsGrounded(false);
+
+                rb.AddRelativeForce(Vector3.up * jumpForce);
             }
             #endregion
         }
